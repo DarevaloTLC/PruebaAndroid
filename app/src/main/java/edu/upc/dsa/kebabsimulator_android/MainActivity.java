@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginUser(String username, String password) throws Exception {
-        String url = "http://10.0.2.2:8080/users/login"; // Cambia esto por la URL de tu servidor
+        String url = "http://10.0.2.2:8080/dsaApp/users/login"; // Cambia esto por la URL de tu servidor
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         JSONObject json = new JSONObject();
         try {
@@ -54,12 +54,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        RequestBody body = RequestBody.create(json.toString(), JSON);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
+        Request request = realizarConsultaAPI(JSON, json, url);
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -103,5 +98,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
+    }
+
+    public Request realizarConsultaAPI(MediaType JSON, JSONObject json, String url){
+        RequestBody body = RequestBody.create(json.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+        return request;
     }
 }
