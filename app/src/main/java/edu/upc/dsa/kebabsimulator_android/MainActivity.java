@@ -1,5 +1,6 @@
 package edu.upc.dsa.kebabsimulator_android;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                Intent intent = new Intent(MainActivity.this, WeaponsListActivity.class);
+                startActivity(intent);
             }
         });
     }
