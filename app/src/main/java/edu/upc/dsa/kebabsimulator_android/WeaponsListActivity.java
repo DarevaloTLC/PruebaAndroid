@@ -25,6 +25,9 @@ import edu.upc.dsa.kebabsimulator_android.models.Weapon;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import java.util.List;
 
 public class WeaponsListActivity extends AppCompatActivity  {
     private RecyclerView recyclerView;
@@ -62,34 +65,39 @@ public class WeaponsListActivity extends AppCompatActivity  {
         try {
             doApiCall();
         } catch (Exception e) {
+            Log.w(TAG,"excp", e);
             throw new RuntimeException(e);
         }
 
     }
 
-    private void doApiCall() throws Exception {
+    private void doApiCall() {
         API apiService = API.retrofit.create(API.class);
         Call<List<Weapon>> call = apiService.weapons();
 
         call.enqueue(new Callback<List<Weapon>>() {
             @Override
             public void onResponse(Call<List<Weapon>> call, Response<List<Weapon>> response) {
-                // set the results to the adapter
-                if(response.body() == null){
-                    Log.w("WARNING", "Respuesta vacía");
-                }
-                else{
+                int code = response.code();
+                List<Weapon> weaponList = response.body();
+                if (response.isSuccessful() && response.body() != null) {
                     adapter.setData(response.body());
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.w(TAG, "Respuesta no exitosa o cuerpo nulo, HTTP " + response.code());
+                    Toast.makeText(WeaponsListActivity.this, "Failed to retrieve data. HTTP code: " + response.code(), Toast.LENGTH_LONG).show();
                 }
             }
+
             @Override
             public void onFailure(Call<List<Weapon>> call, Throwable t) {
-                String msg = "Error in retrofit: "+t.toString();
-                Log.d(TAG,msg);
-                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG);
+                Log.e(TAG, "Error in Retrofit: " + t.toString());
+                Toast.makeText(WeaponsListActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
+
+
 
 
 }

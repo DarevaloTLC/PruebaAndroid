@@ -18,14 +18,14 @@
         app:layout_constraintVertical_bias="0.0">
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/weaponName"
             android:layout_width="323dp"
             android:layout_height="37dp"
             android:text="TextView"
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/secondLine"
+            android:id="@+id/weaponDescription"
             android:layout_width="324dp"
             android:layout_height="wrap_content"
             android:text="TextView" />

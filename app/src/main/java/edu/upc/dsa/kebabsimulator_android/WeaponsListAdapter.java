@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,20 +22,28 @@ public class WeaponsListAdapter extends RecyclerView.Adapter<WeaponsListAdapter.
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
     public class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        public TextView txtHeader;
-        public TextView txtFooter;
-        //public ImageView icon;
+        public TextView txtWeaponName;
+        public TextView txtWeaponDescription;
         public View layout;
 
         public ViewHolder(View v) {
             super(v);
             layout = v;
-            txtHeader = (TextView) v.findViewById(R.id.firstLine);
-            txtFooter = (TextView) v.findViewById(R.id.secondLine);
-            //icon = (ImageView) v.findViewById(R.id.icon);
+            txtWeaponName = v.findViewById(R.id.weaponName);
+            txtWeaponDescription = v.findViewById(R.id.weaponDescription);
+
+            txtWeaponName.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        remove(position);
+                    }
+                }
+            });
         }
     }
+
 
     public void setData(List<Weapon> myDataset) {
         values = myDataset;
@@ -83,15 +90,15 @@ public class WeaponsListAdapter extends RecyclerView.Adapter<WeaponsListAdapter.
         // - replace the contents of the view with that element
         Weapon w = values.get(position);
         final String name = w.getNombre();
-        holder.txtHeader.setText(name);
-        holder.txtHeader.setOnClickListener(new OnClickListener() {
+        holder.txtWeaponName.setText(name);
+        holder.txtWeaponName.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 remove(holder.getAdapterPosition());
             }
         });
 
-        holder.txtFooter.setText("Descripción: " + w.getDescripcion());
+        holder.txtWeaponDescription.setText("Descripción: " + w.getDescripcion());
 
       /*  GlideApp.with(holder.icon.getContext())
                 .load(c.avatar_url)
