@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.json.JSONException;
@@ -35,6 +36,8 @@ public class WeaponsListActivity extends AppCompatActivity  {
 
     private final String TAG = WeaponsListActivity.class.getSimpleName();
 
+
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +52,7 @@ public class WeaponsListActivity extends AppCompatActivity  {
 
 
         recyclerView = (RecyclerView) findViewById(R.id.myRecylcerView);
-
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // use this setting to
         // improve performance if you know that changes
@@ -80,6 +83,7 @@ public class WeaponsListActivity extends AppCompatActivity  {
             public void onResponse(Call<List<Weapon>> call, Response<List<Weapon>> response) {
                 int code = response.code();
                 List<Weapon> weaponList = response.body();
+                Toast.makeText(WeaponsListActivity.this, "Code: " + weaponList.get(0).getNombre(), Toast.LENGTH_LONG).show();
                 if (response.isSuccessful() && response.body() != null) {
                     adapter.setData(response.body());
                     adapter.notifyDataSetChanged();

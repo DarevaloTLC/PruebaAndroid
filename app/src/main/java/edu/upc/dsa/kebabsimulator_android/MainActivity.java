@@ -7,7 +7,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
-import okhttp3.*;
+
+import edu.upc.dsa.kebabsimulator_android.models.API;
+import edu.upc.dsa.kebabsimulator_android.models.User;
+import edu.upc.dsa.kebabsimulator_android.models.Weapon;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,13 +20,18 @@ import android.content.DialogInterface;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private EditText usernameField;
     private EditText passwordField;
     private Button loginButton;
 
-    private final OkHttpClient client = new OkHttpClient();
+    private Button registerButton;
+    private Button listaButton;
+    private List<User> listaUsers;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,83 +41,115 @@ public class MainActivity extends AppCompatActivity {
         usernameField = findViewById(R.id.username);
         passwordField = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginButton);
+        registerButton = findViewById(R.id.registerButton);
+        listaButton = findViewById(R.id.listaButton);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
+
                     loginUser(usernameField.getText().toString(), passwordField.getText().toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                //Intent intent = new Intent(MainActivity.this, WeaponsListActivity.class);
+                //startActivity(intent);
+            }
+        });
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                try {
+                    Toast.makeText(MainActivity.this, "REGISTER", Toast.LENGTH_SHORT).show();
+                    addUser(usernameField.getText().toString(), passwordField.getText().toString());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        listaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, WeaponsListActivity.class);
                 startActivity(intent);
             }
         });
+
     }
 
     private void loginUser(String username, String password) throws Exception {
-        String url = "http://10.0.2.2:8080/dsaApp/users/login"; // Cambia esto por la URL de tu servidor
-        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        JSONObject json = new JSONObject();
+        //String url = "http://10.0.2.2:8080/dsaApp/users/login"; // Cambia esto por la URL de tu servidor
         try {
-            json.put("userName", username);
-            json.put("password", password);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            doApiCall();
+        } catch (Exception e) {
+            Log.w("TAG","excp", e);
+            throw new RuntimeException(e);
         }
-        Request request = realizarConsultaAPI(JSON, json, url);
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                // Trata el caso de error
-                e.printStackTrace();
-                Log.d("error", "error");
-            }
+    }
 
+
+    private void doApiCall() {
+        API apiService = API.retrofit.create(API.class);
+        retrofit2.Call<List<User>> call = apiService.users();
+
+        call.enqueue(new retrofit2.Callback<List<User>>() {
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    final String myResponse = response.body().string();
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Mostrar un diálogo de éxito
-                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                            builder.setTitle("Login Successful")
-                                    .setMessage("You have been successfully logged in.")
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // User clicked OK button
-                                            // Aquí puedes realizar acciones adicionales como cambiar de actividad si es necesario
-                                        }
-                                    });
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
-                        }
-                    });
+            public void onResponse(retrofit2.Call<List<User>> call, retrofit2.Response<List<User>> response) {
+
+                 listaUsers = response.body();
+                if(listaUsers!= null){
+                    Toast.makeText(MainActivity.this, "Respuesta:"+listaUsers.get(1).getUserName(), Toast.LENGTH_SHORT).show();
+                }
+
+                if (response.body() != null) {
+                    Log.d("Success", "Respuesta recibida con éxito");
+
                 } else {
-                    // También considera manejar la respuesta no exitosa adecuadamente aquí
-                    Log.e("HTTP Code", "HTTP " + response.code());
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "Login failed: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    Log.w("FAIL", "Response.body vacío " + response.code());
+
                 }
             }
 
+            @Override
+            public void onFailure(retrofit2.Call<List<User>> call, Throwable t) {
+                Log.e("FAIL(onFailure)", "Error in Retrofit: " + t.toString());
+
+            }
+        });
+    }
+    private void addUser(String username, String password) {
+        User newUser = new User(username, password);
+        API apiService = API.retrofit.create(API.class);
+        retrofit2.Call<User> call = apiService.addUser(newUser);
+
+        call.enqueue(new retrofit2.Callback<User>() {
+            @Override
+            public void onResponse(retrofit2.Call<User> call, retrofit2.Response<User> response) {
+                if (response.isSuccessful()) {
+                    Log.d("Success", "User added successfully");
+                } else {
+                    Log.w("FAIL", "Failed to add user, HTTP " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<User> call, Throwable t) {
+                Log.e("FAIL(onFailure)", "Error in Retrofit: " + t.toString());
+            }
         });
     }
 
-    public Request realizarConsultaAPI(MediaType JSON, JSONObject json, String url){
-        RequestBody body = RequestBody.create(json.toString(), JSON);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        return request;
+    private boolean checkUser(String username, String password) {
+        for (User user : listaUsers) {
+            if (user.getUserName().equals(username) && user.getPassword().equals(password)) {
+                return true;
+            }
+        }
+        return false;
     }
+
 }

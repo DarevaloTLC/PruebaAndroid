@@ -1,6 +1,7 @@
 package edu.upc.dsa.kebabsimulator_android;
 
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +25,8 @@ public class WeaponsListAdapter extends RecyclerView.Adapter<WeaponsListAdapter.
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView txtWeaponName;
         public TextView txtWeaponDescription;
+        public TextView txtWeaponDamage;
+        public TextView txtWeaponPrice;
         public View layout;
 
         public ViewHolder(View v) {
@@ -31,7 +34,8 @@ public class WeaponsListAdapter extends RecyclerView.Adapter<WeaponsListAdapter.
             layout = v;
             txtWeaponName = v.findViewById(R.id.weaponName);
             txtWeaponDescription = v.findViewById(R.id.weaponDescription);
-
+            txtWeaponDamage = v.findViewById(R.id.weaponDamage);
+            txtWeaponPrice = v.findViewById(R.id.weaponPrice);
             txtWeaponName.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -48,6 +52,7 @@ public class WeaponsListAdapter extends RecyclerView.Adapter<WeaponsListAdapter.
     public void setData(List<Weapon> myDataset) {
         values = myDataset;
         notifyDataSetChanged();
+        Log.d("API", "setData called:"+getItemCount());
     }
 
     public void add(int position, Weapon item) {
@@ -91,14 +96,18 @@ public class WeaponsListAdapter extends RecyclerView.Adapter<WeaponsListAdapter.
         Weapon w = values.get(position);
         final String name = w.getNombre();
         holder.txtWeaponName.setText(name);
-        holder.txtWeaponName.setOnClickListener(new OnClickListener() {
+        holder.txtWeaponDamage.setText("Daño: " + w.getDamage());
+        holder.txtWeaponPrice.setText("Precio: " + w.getPrice());
+        /*holder.txtWeaponName.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 remove(holder.getAdapterPosition());
             }
-        });
-
+        });*/
         holder.txtWeaponDescription.setText("Descripción: " + w.getDescripcion());
+
+
+
 
       /*  GlideApp.with(holder.icon.getContext())
                 .load(c.avatar_url)
