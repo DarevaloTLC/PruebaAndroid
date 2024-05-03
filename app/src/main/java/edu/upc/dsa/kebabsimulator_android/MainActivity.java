@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button registerButton;
     private Button listaButton;
-    private List<User> listaUsers;
+    List<User> listaUsers = new ArrayList<User>();
 
 
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 try {
 
-                    loginUser(usernameField.getText().toString(), passwordField.getText().toString());
+                    loginUser();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -80,13 +81,23 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void loginUser(String username, String password) throws Exception {
+    private void loginUser() throws Exception {
         //String url = "http://10.0.2.2:8080/dsaApp/users/login"; // Cambia esto por la URL de tu servidor
         try {
             doApiCall();
         } catch (Exception e) {
             Log.w("TAG","excp", e);
             throw new RuntimeException(e);
+        }
+        if(listaUsers!= null){
+            if (checkUser(usernameField.getText().toString(), passwordField.getText().toString())) {
+                Toast.makeText(MainActivity.this, "Se ha iniciado sesión", Toast.LENGTH_SHORT).show();
+                Log.d("Success", "Usuario logeado con éxito");
+                Intent intent = new Intent(MainActivity.this, WeaponsListActivity.class);startActivity(intent);
+            } else {
+                Toast.makeText(MainActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+            }
+
         }
 
     }
@@ -99,11 +110,9 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new retrofit2.Callback<List<User>>() {
             @Override
             public void onResponse(retrofit2.Call<List<User>> call, retrofit2.Response<List<User>> response) {
-
+                Toast.makeText(MainActivity.this, "Respuesta recibida", Toast.LENGTH_SHORT).show();
                  listaUsers = response.body();
-                if(listaUsers!= null){
-                    Toast.makeText(MainActivity.this, "Respuesta:"+listaUsers.get(1).getUserName(), Toast.LENGTH_SHORT).show();
-                }
+
 
                 if (response.body() != null) {
                     Log.d("Success", "Respuesta recibida con éxito");
